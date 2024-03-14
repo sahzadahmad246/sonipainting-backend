@@ -1,4 +1,13 @@
 {
+  "name": "your-app-name",
+  "version": "1.0.0",
+  "description": "Description of your app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "npm install && npm run build-client",
+    "build-client": "your-build-command-for-client-side-code"
+  },
   "dependencies": {
     "argon2": "^0.40.1",
     "bcrypt": "^5.1.1",
