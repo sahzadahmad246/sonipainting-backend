@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "npm install && npm run build-client",
-    "build-client": "your-build-command-for-client-side-code"
+    "build": "npm install && npm run build-client"
   },
   "dependencies": {
     "argon2": "^0.40.1",
