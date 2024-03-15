@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -8,6 +9,8 @@ const path = require("path");
 const registerSchema = require("../validator");
 const validate = require("../validateMiddleware");
 const authMiddleware = require("../middleware/middleware");
+const nodemailer = require("nodemailer");
+const Contact = require("../database/contactSchema");
 
 
 require("../database/connection");
@@ -275,6 +278,50 @@ router.get("/reviews", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.post("/contact", async (req, res) => {
+  try {
+    const { fname, phone, message } = req.body;
+
+    // Save contact details to the database
+    const newContact = new Contact({ fname, phone, message });
+    await newContact.save();
+
+    // Send email
+    await sendEmail(fname, phone, message);
+
+    res.status(200).json({ message: "Contact details sent successfully" });
+  } catch (error) {
+    console.error("Error sending contact details:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Function to send email
+const sendEmail = async (fname, phone, message) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_ADDRESS,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_ADDRESS,
+      to: process.env.YOUR_EMAIL_ADDRESS, // Change this to your email address
+      subject: "New Contact Form Submission",
+      text: `Name: ${fname}\nPhone: ${phone}\nMessage: ${message}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error; // Rethrow the error to handle it in the caller function
+  }
+};
 
 
 module.exports = router;
