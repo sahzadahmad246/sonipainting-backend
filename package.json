@@ -5,7 +5,7 @@
   "main": "app.js.js",
   "scripts": {
     "start": "node app.js",
-    "build": "npm install && npm run build"
+    "build": "echo \"No build steps for backend required\""
   },
   "dependencies": {
     "argon2": "^0.40.1",
