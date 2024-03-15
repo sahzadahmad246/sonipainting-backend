@@ -1,11 +1,11 @@
 {
-  "name": "your-app-name",
+  "name": "soni painting",
   "version": "1.0.0",
   "description": "Description of your app",
-  "main": "index.js",
+  "main": "app.js.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "npm install && npm run build-client"
+    "start": "node app.js",
+    "build": "npm install && npm run build"
   },
   "dependencies": {
     "argon2": "^0.40.1",
