@@ -150,14 +150,8 @@ router.post(
 
 
 
-router.get('/get-images', authMiddleware, async (req, res) => {
+router.get('/get-images', async (req, res) => {
   try {
-    const user = req.user;
-
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
     // Fetch all users with their images array
     const usersWithImages = await User.find({}, { images: 1 });
 
@@ -170,6 +164,7 @@ router.get('/get-images', authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 router.delete("/delete-image/:imageName", authMiddleware, async (req, res) => {
   try {
