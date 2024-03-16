@@ -12,7 +12,7 @@ const corsOptions = {
   origin: [
     "http://localhost:5173",
     "https://sonipaintingworks.onrender.com",
-    "https://sonipainting.com/",
+    "https://sonipainting.com",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "HEAD", "FETCH"],
   credentials: true,
