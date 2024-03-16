@@ -279,6 +279,7 @@ router.get("/reviews", async (req, res) => {
   }
 });
 
+// Route to save contact data
 router.post("/contact", async (req, res) => {
   try {
     const { fname, phone, message } = req.body;
@@ -287,41 +288,26 @@ router.post("/contact", async (req, res) => {
     const newContact = new Contact({ fname, phone, message });
     await newContact.save();
 
-    // Send email
-    await sendEmail(fname, phone, message);
-
-    res.status(200).json({ message: "Contact details sent successfully" });
+    res.status(200).json({ message: "Contact details saved successfully" });
   } catch (error) {
-    console.error("Error sending contact details:", error);
+    console.error("Error saving contact details:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Function to send email
-const sendEmail = async (fname, phone, message) => {
+
+// Route to get all contact details from the database
+router.get("/messages", async (req, res) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
 
-    const mailOptions = {
-      from: process.env.EMAIL_ADDRESS,
-      to: process.env.YOUR_EMAIL_ADDRESS, // Change this to your email address
-      subject: "New Contact Form Submission",
-      text: `Name: ${fname}\nPhone: ${phone}\nMessage: ${message}`,
-    };
+    const contacts = await Contact.find();
 
-    await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    res.status(200).json({ contacts });
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw error; // Rethrow the error to handle it in the caller function
+    console.error("Error fetching contact details:", error);
+    res.status(500).json({ message: "Server error" });
   }
-};
+});
 
 
 module.exports = router;
