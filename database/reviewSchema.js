@@ -1,6 +1,15 @@
-// reviewSchema.js
-
 const mongoose = require("mongoose");
+
+const replySchema = new mongoose.Schema({
+  text: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  }
+});
 
 const reviewSchema = new mongoose.Schema({
   name: {
@@ -18,7 +27,8 @@ const reviewSchema = new mongoose.Schema({
   review: {
     type: String,
     required: true
-  }
+  },
+  replies: [replySchema] // Array of replies
 });
 
 const Review = mongoose.model("Review", reviewSchema);

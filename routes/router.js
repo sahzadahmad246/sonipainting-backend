@@ -148,18 +148,27 @@ router.get("/average-rating", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.get("/ratings-count", async (req, res) => {
+  try {
+    const ratingsCount = await Review.aggregate([
+      { $group: { _id: "$rating", count: { $sum: 1 } } }
+    ]);
 
+    const ratingsMap = {};
+    ratingsCount.forEach(rating => {
+      ratingsMap[rating._id] = rating.count;
+    });
+
+    res.status(200).json({ ratingsMap });
+  } catch (error) {
+    console.error("Error fetching ratings count:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 router.get("/reviews", async (req, res) => {
   try {
-    const reviews = await Review.find({}, { name: 1, phone: 1, rating: 1, review: 1 });
-
-    // Manually fetch and attach replies to each review
-    for (let i = 0; i < reviews.length; i++) {
-      const review = reviews[i];
-      const populatedReplies = await fetchReplies(review._id);
-      review.replies = populatedReplies;
-    }
+    const reviews = await Review.find({}, { name: 1, phone: 1, rating: 1, review: 1, replies: 1 });
 
     // Calculate the number of reviews
     const numberOfReviews = reviews.length;
@@ -174,6 +183,7 @@ router.get("/reviews", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // Helper function to fetch replies for a review
 async function fetchReplies(reviewId) {
@@ -207,7 +217,6 @@ router.get("/reviews", async (req, res) => {
   }
 });
 
-
 router.post("/add-reply/:reviewId", async (req, res) => {
   try {
     const { reviewId } = req.params;
@@ -216,19 +225,26 @@ router.post("/add-reply/:reviewId", async (req, res) => {
     // Find the review by ID
     const review = await Review.findById(reviewId);
     if (!review) {
-      return res.status(404).json({ message: "Review not found" });
+      return res.status(404).json({ success: false, message: "Review not found" });
+    }
+
+    // Ensure that the review object has a 'replies' property
+    if (!review.replies) {
+      review.replies = [];
     }
 
     // Add the reply to the review
     review.replies.push({ text, date: new Date() });
     await review.save();
 
-    res.status(200).json({ message: "Reply added successfully" });
+    res.status(200).json({ success: true, message: "Reply added successfully" });
   } catch (error) {
     console.error("Error adding reply to review:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
 // Route to save contact data
 router.post("/contact", async (req, res) => {
   try {
