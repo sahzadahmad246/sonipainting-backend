@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 const connectDB = require("./database/connection");
 const router = require("./routes/router");
+const imageRouter = require("./routes/imageRoute");
 
 const port = process.env.PORT || 5000;
 
@@ -27,6 +28,7 @@ app.use(express.json());
 connectDB()
   .then(() => {
     app.use("/", router);
+    app.use("/", imageRouter);
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
