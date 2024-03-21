@@ -121,9 +121,11 @@ router.post(
     try {
       // Get the authenticated user from the request
       const user = req.user;
+      console.log("User uploading images:", user._id);
 
       // Check if the user exists
       if (!user) {
+        console.log("User not found");
         return res.status(404).json({ message: "User not found" });
       }
 
@@ -142,14 +144,15 @@ router.post(
       // Save the updated user
       await user.save();
 
+      console.log("Files uploaded successfully for user:", user._id);
       res.status(200).json({ message: "Files uploaded successfully", user });
-      console.log("Files uploaded successfully");
     } catch (error) {
       console.error("Error during file upload:", error);
       res.status(500).json({ message: "Server error" });
     }
   }
 );
+
 
 
 
@@ -278,7 +281,27 @@ router.get("/reviews", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+router.post("/add-reply/:reviewId", async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { text } = req.body;
 
+    // Find the review by ID
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Add the reply to the review
+    review.replies.push({ text, date: new Date() });
+    await review.save();
+
+    res.status(200).json({ message: "Reply added successfully" });
+  } catch (error) {
+    console.error("Error adding reply to review:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 // Route to save contact data
 router.post("/contact", async (req, res) => {
   try {
