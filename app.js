@@ -1,13 +1,20 @@
-// server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const app = express();
+const session = require("express-session");
+const passport = require("passport");
+const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 const connectDB = require("./database/connection");
 const router = require("./routes/router");
 const imageRouter = require("./routes/imageRoute");
+const userRouter = require("./routes/userRoute");
+const { googleAuthCallback } = require("./controllers/userController");
+
+const app = express();
 
 const port = process.env.PORT || 5000;
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
 
 const corsOptions = {
   origin: [
@@ -22,19 +29,52 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.static("public"));
 
+// Setup session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 6 * 30 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+    },
+  })
+);
+
+// Setup passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure Google OAuth2 strategy
+passport.use(
+  new OAuth2Strategy(
+    {
+      clientID: clientId,
+      clientSecret: clientSecret,
+      callbackURL: "/auth/google/callback",
+    },
+    googleAuthCallback
+  )
+);
+
 // Middleware to parse incoming JSON data
 app.use(express.json());
 
+// Use the user router for authentication routes
+app.use("/", userRouter);
+
+// Use other routers
+app.use("/", router);
+app.use("/", imageRouter);
+
 connectDB()
   .then(() => {
-    app.use("/", router);
-    app.use("/", imageRouter);
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   })
   .catch((error) => {
     console.error("Error connecting to the database:", error);
-    // Handle the error, e.g., gracefully exit the application
     process.exit(1);
   });

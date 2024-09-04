@@ -1,46 +1,56 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const userSchema = new mongoose.Schema(
+  {
+    googleId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    avatar: {
+      public_id: {
+        type: String,
+        required: false,
+      },
+      url: {
+        type: String,
+        required: false,
+      },
+    },
+    phoneNumber: {
+      type: String,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  phone: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  images: [String],
+  { timestamps: true }
+);
+
+// Middleware to update the updatedAt field before save
+userSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
+  next();
 });
 
-// Method to generate token
-userSchema.methods.generateToken = async function () {
-  try {
-    return jwt.sign(
-      {
-        userId: this._id.toString(),
-        email: this.email,
-      },
-      process.env.JWT_SECRET_KEY,
-      {
-        expiresIn: "30d",
-      }
-    );
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const User = mongoose.model("USER", userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
