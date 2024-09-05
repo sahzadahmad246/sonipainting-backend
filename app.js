@@ -49,7 +49,7 @@ app.use(passport.session());
 // Configure Google OAuth2 strategy
 const callbackURL =
   process.env.NODE_ENV === "production"
-    ? "http://sonipainting-backend.onrender.com/auth/google/callback"
+    ? "https://sonipainting-backend.onrender.com/auth/google/callback"
     : "http://localhost:5000/auth/google/callback";
 
 passport.use(
