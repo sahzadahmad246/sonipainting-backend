@@ -60,6 +60,7 @@ passport.use(
   )
 );
 
+
 // Middleware to parse incoming JSON data
 app.use(express.json());
 
