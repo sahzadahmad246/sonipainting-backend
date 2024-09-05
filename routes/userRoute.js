@@ -14,8 +14,8 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:5173",
-    failureRedirect: "http://localhost:5173/login",
+    successRedirect: "https://sonipainting.com/",
+    failureRedirect: "https://sonipainting.com/login",
   })
 );
 
