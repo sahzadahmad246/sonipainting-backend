@@ -59,7 +59,7 @@ const googleAuthSuccess = async (req, res) => {
 const logout = (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
-    res.redirect("http://localhost:5173");
+    res.redirect("https://sonipainting.com");
   });
 };
 
