@@ -1,9 +1,19 @@
-// userRoute.js
 const express = require("express");
 const passport = require("passport");
 const { googleAuthSuccess, logout } = require("../controllers/userController");
 
 const router = express.Router();
+
+// Determine the redirect URLs based on the environment
+const successRedirectURL =
+  process.env.NODE_ENV === "production"
+    ? "https://sonipainting.com/"
+    : "http://localhost:5173/";
+
+const failureRedirectURL =
+  process.env.NODE_ENV === "production"
+    ? "https://sonipainting.com/login"
+    : "http://localhost:5173/login";
 
 // Routes for Google OAuth2 authentication
 router.get(
@@ -14,8 +24,8 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: "https://sonipainting.com/",
-    failureRedirect: "https://sonipainting.com/login",
+    successRedirect: successRedirectURL,
+    failureRedirect: failureRedirectURL,
   })
 );
 
