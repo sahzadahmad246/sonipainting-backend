@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema(
       },
     },
     phoneNumber: {
-      type: String,
+      type: String,  // Not unique, not required
+      required: false,
     },
     isAdmin: {
       type: Boolean,

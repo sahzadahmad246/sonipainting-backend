@@ -1,11 +1,13 @@
-// userController.js
 const passport = require("passport");
 const User = require("../database/userSchema");
 
 // Google OAuth2 Strategy configuration
 const googleAuthCallback = async (accessToken, refreshToken, profile, done) => {
   try {
+    // Find user by Google ID
     let user = await User.findOne({ googleId: profile.id });
+
+    // If the user doesn't exist, create a new one
     if (!user) {
       user = new User({
         googleId: profile.id,
@@ -15,21 +17,23 @@ const googleAuthCallback = async (accessToken, refreshToken, profile, done) => {
           public_id: "",
           url: profile.photos[0].value,
         },
+        phoneNumber: null,  // Optional, initially set to null
       });
       await user.save();
     }
+
     return done(null, user);
   } catch (err) {
     return done(err, null);
   }
 };
 
-// Serialize user
+// Serialize user to store in the session
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Deserialize user
+// Deserialize user to retrieve from the session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);

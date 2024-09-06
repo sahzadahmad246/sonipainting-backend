@@ -11,11 +11,11 @@ const userRouter = require("./routes/userRoute");
 const { googleAuthCallback } = require("./controllers/userController");
 
 const app = express();
-
 const port = process.env.PORT || 5000;
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 
+// CORS configuration
 const corsOptions = {
   origin: [
     "http://localhost:5173",
@@ -60,14 +60,11 @@ passport.use(
   )
 );
 
-
 // Middleware to parse incoming JSON data
 app.use(express.json());
 
 // Use the user router for authentication routes
 app.use("/", userRouter);
-
-// Use other routers
 app.use("/", router);
 app.use("/", imageRouter);
 
