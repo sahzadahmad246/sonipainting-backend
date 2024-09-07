@@ -17,14 +17,12 @@ const googleAuthCallback = async (accessToken, refreshToken, profile, done) => {
       });
       await user.save();
     }
-    
+
     return done(null, user);
   } catch (err) {
-    
     return done(err, null);
   }
 };
-
 
 // Serialize user to store in the session
 passport.serializeUser((user, done) => {
