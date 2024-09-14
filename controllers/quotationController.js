@@ -15,62 +15,17 @@ exports.createQuotation = async (req, res) => {
   }
 };
 
-// update quotation
-exports.updateQuotation = async (req, res) => {
-  try {
-    const {
-      name,
-      number,
-      address,
-      items,
-      subtotal,
-      discount,
-      grandTotal,
-      status,
-      rejectionReason,
-    } = req.body;
-
-    // Build the update object
-    let updateData = {
-      client: {},
-      items,
-      subtotal,
-      discount,
-      grandTotal,
-      status: status || "pending",
-      rejectionReason: rejectionReason || "",
-    };
-
-    if (name) updateData.client.name = name;
-    if (number) updateData.client.number = number;
-    if (address) updateData.client.address = address;
-
-    // Find and update the quotation (except clientSignature)
-    const updatedQuotation = await Quotation.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
-
-    // Return the updated quotation
-    res.json(updatedQuotation);
-  } catch (error) {
-    console.error("Error updating quotation:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
 //update signature
 exports.updateSignature = async (req, res) => {
   try {
     const { signature } = req.body;
 
     if (signature) {
+      // Upload the signature to Cloudinary
       const uploadedResponse = await cloudinary.uploader.upload(signature, {
         folder: "signatures",
       });
 
-      // Update the quotation with the signature's public ID and URL
       const updatedQuotation = await Quotation.findByIdAndUpdate(
         req.params.id,
         {
@@ -78,8 +33,10 @@ exports.updateSignature = async (req, res) => {
             public_id: uploadedResponse.public_id,
             url: uploadedResponse.secure_url,
           },
+          status: "accepted",
+          rejectionReason: " ",
         },
-        { new: true }
+        { new: true } // Return the updated document
       );
 
       res.json(updatedQuotation);
@@ -90,6 +47,53 @@ exports.updateSignature = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//update Quotation
+exports.updateQuotation = async (req, res) => {
+  try {
+    const {
+      client,
+      items,
+      subtotal,
+      discount,
+      grandTotal,
+      status,
+      rejectionReason,
+    } = req.body;
+    
+    // Build the update object
+    let updateData = {};
+
+    // Check if client data exists, and update it if provided
+    if (client) {
+      updateData.client = {};
+      if (client.name) updateData.client.name = client.name;
+      if (client.number) updateData.client.number = client.number;
+      if (client.address) updateData.client.address = client.address;
+    }
+
+    // Only add fields to updateData if they are provided in the request
+    if (items) updateData.items = items;
+    if (subtotal) updateData.subtotal = subtotal;
+    if (discount) updateData.discount = discount;
+    if (grandTotal) updateData.grandTotal = grandTotal;
+    if (status) updateData.status = status;
+    if (rejectionReason) updateData.rejectionReason = rejectionReason;
+
+    // Find and update the quotation (except clientSignature)
+    const updatedQuotation = await Quotation.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData }, // Only update provided fields
+      { new: true }
+    );
+
+    // Return the updated quotation
+    res.json(updatedQuotation);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Delete a quotation
 exports.deleteQuotation = async (req, res) => {
   const { id } = req.params;
