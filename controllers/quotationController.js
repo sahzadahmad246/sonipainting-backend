@@ -22,9 +22,15 @@ exports.updateSignature = async (req, res) => {
 
     if (signature) {
       // Upload the signature to Cloudinary
-      const uploadedResponse = await cloudinary.uploader.upload(signature, {
-        folder: "signatures",
-      });
+      const uploadedResponse = await cloudinary.uploader
+        .upload(signature, {
+          folder: "signatures",
+        })
+        .catch((err) => {
+          return res
+            .status(500)
+            .json({ message: "Error uploading signature to Cloudinary" });
+        });
 
       const updatedQuotation = await Quotation.findByIdAndUpdate(
         req.params.id,
@@ -60,7 +66,7 @@ exports.updateQuotation = async (req, res) => {
       status,
       rejectionReason,
     } = req.body;
-    
+
     // Build the update object
     let updateData = {};
 
