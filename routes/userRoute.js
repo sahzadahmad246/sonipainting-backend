@@ -1,38 +1,31 @@
 const express = require("express");
-const passport = require("passport");
-const { googleAuthSuccess, logout } = require("../controllers/userController");
+const {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserById,
+  getAllUsers,
+  getLoggedInUser,
+} = require("../controllers/userController");
 
 const router = express.Router();
 
-// Determine the redirect URLs based on the environment
-const successRedirectURL =
-  process.env.NODE_ENV === "production"
-    ? "https://sonipainting.com/"
-    : "http://localhost:5173/";
+// Register route
+router.post("/register", registerUser);
 
-const failureRedirectURL =
-  process.env.NODE_ENV === "production"
-    ? "https://sonipainting.com/login"
-    : "http://localhost:5173/login";
+// Login route
+router.post("/login", loginUser);
 
-// Routes for Google OAuth2 authentication
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// Logout route
+router.get("/logout", logoutUser);
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    successRedirect: successRedirectURL,
-    failureRedirect: failureRedirectURL,
-  })
-);
+// get logged in user
+router.get("/me", getLoggedInUser);
 
-// Route to handle successful login
-router.get("/login/success", googleAuthSuccess);
+// Get User By id
+router.post("/user", getUserById);
 
-// Route to handle logout
-router.get("/logout", logout);
+// Get all Users
+router.get("/users", getAllUsers);
 
 module.exports = router;
