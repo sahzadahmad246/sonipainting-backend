@@ -11,10 +11,9 @@ const { googleAuthCallback } = require("./controllers/userController");
 const cloudinary = require("cloudinary");
 const app = express();
 const port = process.env.PORT || 5000;
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-
 const fileUpload = require("express-fileupload");
+
+
 // CORS configuration
 const corsOptions = {
   origin: [
@@ -28,14 +27,19 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.static("public"));
-
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 // Middleware to parse incoming JSON data
 app.use(express.json());
 app.use(cookieParser());
 // Use the user router for authentication routes
 app.use("/api", userRouter);
 app.use("/", router);
-app.use("/", imageRouter);
+app.use("/api/v1", imageRouter);
 app.use("/", quotationRoute);
 
 connectDB()
