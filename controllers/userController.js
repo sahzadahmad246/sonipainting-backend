@@ -30,6 +30,7 @@ exports.registerUser = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      sameSite: "None",
     });
 
     res.status(201).json({ message: "User created successfully", token });
@@ -65,8 +66,9 @@ exports.loginUser = async (req, res) => {
     // Send token as cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      secure: process.env.NODE_ENV === "production", // Secure cookies only in production
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Cookie expires in 7 days
+      sameSite: "None", // Allows cross-site requests, required to be used with secure flag
     });
 
     res.status(200).json({ message: "Login successful", token });

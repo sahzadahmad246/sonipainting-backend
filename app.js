@@ -13,7 +13,6 @@ const app = express();
 const port = process.env.PORT || 5000;
 const fileUpload = require("express-fileupload");
 
-
 // CORS configuration
 const corsOptions = {
   origin: [
@@ -23,7 +22,6 @@ const corsOptions = {
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "HEAD", "FETCH"],
   credentials: true,
-  sameSite: "None",
 };
 
 app.use(cors(corsOptions));
