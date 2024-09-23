@@ -6,57 +6,56 @@ exports.uploadImages = async (req, res) => {
     const descriptions = req.body["descriptions[]"]; 
     const files = req.files.images; 
 
-    console.log("Descriptions:", descriptions);
-    console.log("Files:", files);
+    const descriptionsArray = Array.isArray(descriptions) ? descriptions : [descriptions];
 
-    if (!files || !descriptions || files.length !== descriptions.length) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Images and descriptions are required, and both should have the same length.",
-        });
+  
+    const filesArray = Array.isArray(files) ? files : [files];
+
+   
+    if (!filesArray || !descriptionsArray) {
+      return res.status(400).json({
+        message: "Images and descriptions are required.",
+      });
+    }
+
+    if (filesArray.length !== descriptionsArray.length) {
+      return res.status(400).json({
+        message: "Images and descriptions should have the same length.",
+      });
     }
 
     let uploadedImages = [];
 
-    // Ensure files is an array
-    const filesArray = Array.isArray(files) ? files : [files];
-
-    // Upload each file to Cloudinary
+    // Uploading each file to Cloudinary
     for (let i = 0; i < filesArray.length; i++) {
-      const uploadedResponse = await cloudinary.uploader
-        .upload(filesArray[i].tempFilePath, {
-          folder: "images",
-        })
-        .catch((err) => {
-          return res
-            .status(500)
-            .json({ message: `Error uploading image ${i + 1} to Cloudinary` });
-        });
+      const uploadedResponse = await cloudinary.uploader.upload(filesArray[i].tempFilePath, {
+        folder: "images",
+      });
+
+      if (!uploadedResponse) {
+        return res.status(500).json({ message: `Error uploading image ${i + 1} to Cloudinary` });
+      }
 
       uploadedImages.push({
         url: uploadedResponse.secure_url,
         public_id: uploadedResponse.public_id,
-        description: descriptions[i], // Assign the corresponding description
+        description: descriptionsArray[i],
       });
     }
 
-    // Save the uploaded images data and descriptions in the database
     const newImageEntry = new Image({
       images: uploadedImages,
     });
 
     await newImageEntry.save();
 
-    res
-      .status(200)
-      .json({ message: "Images uploaded successfully", newImageEntry });
+    res.status(200).json({ message: "Images uploaded successfully", newImageEntry });
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 exports.updateImage = async (req, res) => {
   try {
